@@ -3,16 +3,23 @@ from PyQt5 import QtWidgets, uic
 from models import session, User
 from werkzeug.security import generate_password_hash
 import re
+import pyperclip
 
 class Window(QtWidgets.QMainWindow):
-    app_title = ''
     def __init__(self):
         super().__init__()
         uic.loadUi('form.ui', self)
         self.setFixedSize(self.size())
         self.onload()
         self.pwd.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.uyeler.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.uyeler.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.uyeler.verticalHeader().setVisible(False)
+        self.uyeler.setAlternatingRowColors(True)
+        self.uyeler.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         self.show()
+        # double click table row
+        self.uyeler.itemDoubleClicked.connect(self.copyText)
         self.ekle.clicked.connect(self.createUser)
         self.sil.clicked.connect(self.deleteUser)
         self.uyeler.doubleClicked.connect(self.getUser)
@@ -22,12 +29,17 @@ class Window(QtWidgets.QMainWindow):
         hashed_password = generate_password_hash(password, method='sha256', salt_length=8)
         return hashed_password
     
-    def isEmail(self, email):
+    def isEmail(self, email) -> bool:
         regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
         if re.match(regex, email):
             return True 
         else:
             return False
+        
+    def copyText(self, item):
+        text = item.text()
+        pyperclip.copy(text)
+        self.sendMessage('Seçilen satır içeriği kopyalandı')
         
     def sendError(self, error):
         return QtWidgets.QMessageBox.warning(self, 'Hata', error)
@@ -82,45 +94,41 @@ class Window(QtWidgets.QMainWindow):
                     self.sendMessage('Kullanıcı silindi')
                     
     def updateUser(self):
-        user = session.query(User).filter_by(id=int(self.userid.text())).first()
-        if user:
-            if self.isEmail(self.email.text()) == False:
-                self.sendError('Lütfen geçerli bir eposta adresi giriniz')
-                self.email.clear()
-            elif len(self.pwd.text()) > 1 and  len(self.pwd.text()) < 6:
-                self.sendError('Şifre en az 6 karakter olmalıdır')
-                self.pwd.clear()
-            else:
-                session.query(User).filter_by(id=int(user.id)).update(
-                    {
-                        'name': self.username.text(),
-                        'email': self.email.text(),
-                        'password': self.generatePassword(self.pwd.text()) if self.pwd.text() else user.password
-                    }
-                )
-                session.commit()
-                self.userid.clear()
-                self.username.clear()
-                self.email.clear()
-                self.pwd.clear()
-                self.getUsers()
-                self.sendMessage('Kullanıcı bilgileri güncellendi')
+        if self.uyeler.currentRow() == -1:
+            self.sendError('Lütfen güncellemek istediğiniz kullanıcıyı seçiniz')
         else:
-            self.sendError('Kullanıcı bulunamadı')
+            user = session.query(User).filter_by(id=int(self.userid.text())).first()
+            if user:
+                if self.isEmail(self.email.text()) == False:
+                    self.sendError('Lütfen geçerli bir eposta adresi giriniz')
+                    self.email.clear()
+                elif len(self.pwd.text()) > 1 and  len(self.pwd.text()) < 6:
+                    self.sendError('Şifre en az 6 karakter olmalıdır')
+                    self.pwd.clear()
+                else:
+                    session.query(User).filter_by(id=int(user.id)).update(
+                        {
+                            'name': self.username.text(),
+                            'email': self.email.text(),
+                            'password': self.generatePassword(self.pwd.text()) if self.pwd.text() else user.password
+                        }
+                    )
+                    session.commit()
+                    self.userid.clear()
+                    self.username.clear()
+                    self.email.clear()
+                    self.pwd.clear()
+                    self.getUsers()
+                    self.sendMessage('Kullanıcı bilgileri güncellendi')
+            else:
+                self.sendError('Kullanıcı bulunamadı')
             
     def getUsers(self):
         users = session.query(User).all()
+        column_count_table = len(users[0].__table__.columns.keys())
         self.uyeler.setRowCount(len(users))
-        self.uyeler.setColumnCount(5)
+        self.uyeler.setColumnCount(column_count_table - 1)
         self.uyeler.setHorizontalHeaderLabels(['Kullanıcı Adı', 'Kullanıcı Eposta', 'Kullanıcı Şifre', 'Katılım tarihi', 'Güncelleme tarihi'])
-        self.uyeler.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.uyeler.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        self.uyeler.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-        self.uyeler.setShowGrid(False)
-        self.uyeler.verticalHeader().setVisible(False)
-        self.uyeler.setAlternatingRowColors(True)
-        self.uyeler.setSortingEnabled(True)
-        self.uyeler.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         for user in users:
             self.uyeler.setItem(users.index(user), 0, QtWidgets.QTableWidgetItem(user.name))
             self.uyeler.setItem(users.index(user), 1, QtWidgets.QTableWidgetItem(user.email))
