@@ -1,0 +1,136 @@
+import sys
+from PyQt5 import QtWidgets, uic
+from models import session, User
+from werkzeug.security import generate_password_hash
+import re
+
+class Window(QtWidgets.QMainWindow):
+    app_title = ''
+    def __init__(self):
+        super().__init__()
+        uic.loadUi('form.ui', self)
+        self.setFixedSize(self.size())
+        self.onload()
+        self.pwd.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.show()
+        self.ekle.clicked.connect(self.createUser)
+        self.sil.clicked.connect(self.deleteUser)
+        self.uyeler.doubleClicked.connect(self.getUser)
+        self.guncelle.clicked.connect(self.updateUser)
+        
+    def generatePassword(self, password) -> str:
+        hashed_password = generate_password_hash(password, method='sha256', salt_length=8)
+        return hashed_password
+    
+    def isEmail(self, email):
+        regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        if re.match(regex, email):
+            return True 
+        else:
+            return False
+        
+    def sendError(self, error):
+        return QtWidgets.QMessageBox.warning(self, 'Hata', error)
+    
+    def sendMessage(self, message):
+        return QtWidgets.QMessageBox.information(self, 'Bilgi', message)
+    
+    def sendQuestion(self, question, title):
+        return QtWidgets.QMessageBox.question(self, title, question, QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
+        
+    def onload(self):
+        self.getUsers()
+        
+    def getUser(self):
+        user = session.query(User).filter_by(name=self.uyeler.item(self.uyeler.currentRow(), 0).text()).first()
+        self.userid.setText(str(user.id))
+        self.username.setText(user.name)
+        self.email.setText(user.email)
+        
+    def createUser(self):
+        user = User(name=self.username.text(), email=self.email.text(), password=self.generatePassword(self.pwd.text()))
+        existing_user = session.query(User).filter_by(name=self.username.text()).first()
+        if existing_user:
+            self.sendError('Bu kullanıcı zaten kayıtlı')
+        elif self.isEmail(self.email.text()) == False:
+            self.sendError('Lütfen geçerli bir eposta adresi giriniz')
+            self.email.clear()
+        elif len(self.pwd.text()) < 6:
+            self.sendError('Şifre en az 6 karakter olmalıdır')
+            self.pwd.clear()
+        else:
+            session.add(user)
+            session.commit()
+            self.username.clear()
+            self.email.clear()
+            self.pwd.clear()
+            self.getUsers()
+            self.sendMessage('Kullanıcı başarıyla eklendi')
+            
+    def deleteUser(self):
+        if self.uyeler.currentRow() == -1:
+            self.sendError('Lütfen silmek istediğiniz kullanıcıyı seçiniz')
+        else:
+            name = self.uyeler.item(self.uyeler.currentRow(), 0).text()
+            if name:
+                question = self.sendQuestion('Bu kullanıcıyı silmek istediğinize emin misiniz?', 'Silme')
+                if question == QtWidgets.QMessageBox.Yes:
+                    user = session.query(User).filter_by(name=name).first()
+                    session.delete(user)
+                    session.commit()
+                    self.getUsers()
+                    self.sendMessage('Kullanıcı silindi')
+                    
+    def updateUser(self):
+        user = session.query(User).filter_by(id=int(self.userid.text())).first()
+        if user:
+            if self.isEmail(self.email.text()) == False:
+                self.sendError('Lütfen geçerli bir eposta adresi giriniz')
+                self.email.clear()
+            elif len(self.pwd.text()) < 6:
+                self.sendError('Şifre en az 6 karakter olmalıdır')
+                self.pwd.clear()
+            else:
+                session.query(User).filter_by(id=int(user.id)).update(
+                    {
+                        'name': self.username.text(),
+                        'email': self.email.text(),
+                        'password': self.generatePassword(self.pwd.text()) if self.pwd.text() else user.password
+                    }
+                )
+                session.commit()
+                self.userid.clear()
+                self.username.clear()
+                self.email.clear()
+                self.pwd.clear()
+                self.getUsers()
+                self.sendMessage('Kullanıcı bilgileri güncellendi')
+        else:
+            self.sendError('Kullanıcı bulunamadı')
+            
+    def getUsers(self):
+        users = session.query(User).all()
+        self.uyeler.setRowCount(len(users))
+        self.uyeler.setColumnCount(5)
+        self.uyeler.setHorizontalHeaderLabels(['Kullanıcı Adı', 'Kullanıcı Eposta', 'Kullanıcı Şifre', 'Katılım tarihi', 'Güncelleme tarihi'])
+        self.uyeler.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.uyeler.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.uyeler.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.uyeler.setShowGrid(False)
+        self.uyeler.verticalHeader().setVisible(False)
+        self.uyeler.setAlternatingRowColors(True)
+        self.uyeler.setSortingEnabled(True)
+        self.uyeler.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+        for user in users:
+            self.uyeler.setItem(users.index(user), 0, QtWidgets.QTableWidgetItem(user.name))
+            self.uyeler.setItem(users.index(user), 1, QtWidgets.QTableWidgetItem(user.email))
+            self.uyeler.setItem(users.index(user), 2, QtWidgets.QTableWidgetItem(user.password))
+            self.uyeler.setItem(users.index(user), 3, QtWidgets.QTableWidgetItem(user.created_at.strftime('%d.%m.%Y %H:%M:%S')))
+            self.uyeler.setItem(users.index(user), 4, QtWidgets.QTableWidgetItem(user.updated_at.strftime('%d.%m.%Y %H:%M:%S')))
+        
+app = QtWidgets.QApplication(sys.argv)
+
+window = Window()
+window.setWindowTitle('PyQT Crud Application')
+
+sys.exit(app.exec_())
