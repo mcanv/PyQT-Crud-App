@@ -20,7 +20,7 @@ class Window(QtWidgets.QMainWindow):
         self.uyeler.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         self.show()
         # double click table row
-        self.uyeler.itemDoubleClicked.connect(self.copyText)
+        self.uyeler.itemClicked.connect(self.copyText)
         self.ekle.clicked.connect(self.createUser)
         self.sil.clicked.connect(self.deleteUser)
         self.uyeler.doubleClicked.connect(self.getUser)
