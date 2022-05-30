@@ -33,3 +33,7 @@ python main.py
 ```
 
 şeklinde programımızı artık çalıştırabiliriz.
+
+## Önizleme
+
+![Onizleme](https://i.ibb.co/mzzX03k/Ekran-Goruntusu-20220530-194035.png "Onizleme")
