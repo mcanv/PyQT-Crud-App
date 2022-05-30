@@ -1,3 +1,4 @@
+import datetime
 import sys
 from PyQt5 import QtWidgets, uic
 from models import session, User
@@ -39,7 +40,6 @@ class Window(QtWidgets.QMainWindow):
     def copyText(self, item):
         text = item.text()
         pyperclip.copy(text)
-        self.sendMessage('Seçilen satır içeriği kopyalandı')
         
     def sendError(self, error):
         return QtWidgets.QMessageBox.warning(self, 'Hata', error)
@@ -110,7 +110,8 @@ class Window(QtWidgets.QMainWindow):
                         {
                             'name': self.username.text(),
                             'email': self.email.text(),
-                            'password': self.generatePassword(self.pwd.text()) if self.pwd.text() else user.password
+                            'password': self.generatePassword(self.pwd.text()) if self.pwd.text() else user.password,
+                            'updated_at': datetime.datetime.now()
                         }
                     )
                     session.commit()
@@ -128,7 +129,7 @@ class Window(QtWidgets.QMainWindow):
         column_count_table = len(users[0].__table__.columns.keys())
         self.uyeler.setRowCount(len(users))
         self.uyeler.setColumnCount(column_count_table - 1)
-        self.uyeler.setHorizontalHeaderLabels(['Kullanıcı Adı', 'Kullanıcı Eposta', 'Kullanıcı Şifre', 'Katılım tarihi', 'Güncelleme tarihi'])
+        self.uyeler.setHorizontalHeaderLabels(['Adı', 'Eposta', 'Şifre', 'Katılım', 'Güncelleme'])
         for user in users:
             self.uyeler.setItem(users.index(user), 0, QtWidgets.QTableWidgetItem(user.name))
             self.uyeler.setItem(users.index(user), 1, QtWidgets.QTableWidgetItem(user.email))
