@@ -87,7 +87,7 @@ class Window(QtWidgets.QMainWindow):
             if self.isEmail(self.email.text()) == False:
                 self.sendError('Lütfen geçerli bir eposta adresi giriniz')
                 self.email.clear()
-            elif len(self.pwd.text()) < 6:
+            elif len(self.pwd.text()) > 1 and  len(self.pwd.text()) < 6:
                 self.sendError('Şifre en az 6 karakter olmalıdır')
                 self.pwd.clear()
             else:
