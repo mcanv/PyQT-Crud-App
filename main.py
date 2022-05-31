@@ -11,7 +11,7 @@ class Window(QtWidgets.QMainWindow):
         self.onload()
         self.pwd.setEchoMode(QtWidgets.QLineEdit.Password)
         self.uyeler.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.uyeler.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.uyeler.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
         self.uyeler.verticalHeader().setVisible(False)
         self.uyeler.setAlternatingRowColors(True)
         self.uyeler.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
@@ -90,6 +90,8 @@ class Window(QtWidgets.QMainWindow):
                     
     def updateUser(self):
         if self.uyeler.currentRow() == -1:
+            self.sendError('Lütfen güncellemek istediğiniz kullanıcıyı seçiniz')
+        elif self.userid.text() == '':
             self.sendError('Lütfen güncellemek istediğiniz kullanıcıyı seçiniz')
         else:
             user = session.query(User).filter_by(id=int(self.userid.text())).first()
