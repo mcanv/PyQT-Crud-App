@@ -10,16 +10,16 @@ class Window(QtWidgets.QMainWindow):
         self.setFixedSize(self.size())
         self.onload()
         self.pwd.setEchoMode(QtWidgets.QLineEdit.Password)
-        self.uyeler.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.uyeler.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
-        self.uyeler.verticalHeader().setVisible(False)
-        self.uyeler.setAlternatingRowColors(True)
-        self.uyeler.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+        self.users.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.users.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
+        self.users.verticalHeader().setVisible(False)
+        self.users.setAlternatingRowColors(True)
+        self.users.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         self.show()
-        self.ekle.clicked.connect(self.createUser)
-        self.sil.clicked.connect(self.deleteUser)
-        self.uyeler.doubleClicked.connect(self.getUser)
-        self.guncelle.clicked.connect(self.updateUser)
+        self.create.clicked.connect(self.createUser)
+        self.delete.clicked.connect(self.deleteUser)
+        self.users.doubleClicked.connect(self.getUser)
+        self.update.clicked.connect(self.updateUser)
         
     def isEmail(self, email) -> bool:
         regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
@@ -29,17 +29,17 @@ class Window(QtWidgets.QMainWindow):
             return False
         
     def closeEvent(self, event):
-        answer = self.sendQuestion('Çıkmak istediğinize emin misiniz?', 'Çıkış')
+        answer = self.sendQuestion('Do you want to close app? ', 'Info')
         if answer == QtWidgets.QMessageBox.Yes:
             event.accept()
         else:
             event.ignore()
         
     def sendError(self, error):
-        return QtWidgets.QMessageBox.warning(self, 'Hata', error)
+        return QtWidgets.QMessageBox.warning(self, 'Error', error)
     
     def sendMessage(self, message):
-        return QtWidgets.QMessageBox.information(self, 'Bilgi', message)
+        return QtWidgets.QMessageBox.information(self, 'Info', message)
     
     def sendQuestion(self, question, title):
         return QtWidgets.QMessageBox.question(self, title, question, QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
@@ -58,12 +58,12 @@ class Window(QtWidgets.QMainWindow):
         user.set_password(self.pwd.text())
         existing_user = session.query(User).filter_by(name=self.username.text()).first()
         if existing_user:
-            self.sendError('Bu kullanıcı zaten kayıtlı')
+            self.sendError('User already exists')
         elif self.isEmail(self.email.text()) == False:
-            self.sendError('Lütfen geçerli bir eposta adresi giriniz')
+            self.sendError('Please enter a valid email address')
             self.email.clear()
         elif len(self.pwd.text()) < 6:
-            self.sendError('Şifre en az 6 karakter olmalıdır')
+            self.sendError('Password must be at least 6 characters')
             self.pwd.clear()
         else:
             session.add(user)
@@ -72,15 +72,15 @@ class Window(QtWidgets.QMainWindow):
             self.email.clear()
             self.pwd.clear()
             self.getUsers()
-            self.sendMessage(f'{user.name} adında kullanıcı başarıyla eklendi')
+            self.sendMessage(f'User {user.name} created')
             
     def deleteUser(self):
         if self.uyeler.currentRow() == -1:
-            self.sendError('Lütfen silmek istediğiniz kullanıcıyı seçiniz')
+            self.sendError('Please select a user to delete')
         else:
             name = self.uyeler.item(self.uyeler.currentRow(), 0).text()
             if name:
-                question = self.sendQuestion(f'{name} adlı kullanıcıyı silmek istediğinize emin misiniz?', 'Silme')
+                question = self.sendQuestion(f'Do you want to delete {name} user?', 'Deleting')
                 if question == QtWidgets.QMessageBox.Yes:
                     user = session.query(User).filter_by(name=name).first()
                     session.delete(user)
@@ -90,17 +90,17 @@ class Window(QtWidgets.QMainWindow):
                     
     def updateUser(self):
         if self.uyeler.currentRow() == -1:
-            self.sendError('Lütfen güncellemek istediğiniz kullanıcıyı seçiniz')
+            self.sendError('Please select a user to update')
         elif self.userid.text() == '':
-            self.sendError('Lütfen güncellemek istediğiniz kullanıcıyı seçiniz')
+            self.sendError('Please select a user to update')
         else:
             user = session.query(User).filter_by(id=int(self.userid.text())).first()
             if user:
                 if self.isEmail(self.email.text()) == False:
-                    self.sendError('Lütfen geçerli bir eposta adresi giriniz')
+                    self.sendError('Please enter a valid email address')
                     self.email.clear()
                 elif len(self.pwd.text()) > 1 and  len(self.pwd.text()) < 6:
-                    self.sendError('Şifre en az 6 karakter olmalıdır')
+                    self.sendError('Password must be at least 6 characters')
                     self.pwd.clear()
                 else:
                     if self.pwd.text():
@@ -113,15 +113,15 @@ class Window(QtWidgets.QMainWindow):
                     self.email.clear()
                     self.pwd.clear()
                     self.getUsers()
-                    self.sendMessage('Kullanıcı bilgileri güncellendi')
+                    self.sendMessage('User information updated')
             else:
-                self.sendError('Kullanıcı bulunamadı')
+                self.sendError('User not found')
             
     def getUsers(self):
         users = session.query(User).all()
         self.uyeler.setRowCount(len(users))
         self.uyeler.setColumnCount(5)
-        self.uyeler.setHorizontalHeaderLabels(['Adı', 'Eposta', 'Şifre', 'Katılım', 'Güncelleme'])
+        self.uyeler.setHorizontalHeaderLabels(['Username', 'Email', 'Password', 'Created', 'Updated'])
         for user in users:
             self.uyeler.setItem(users.index(user), 0, QtWidgets.QTableWidgetItem(user.name))
             self.uyeler.setItem(users.index(user), 1, QtWidgets.QTableWidgetItem(user.email))

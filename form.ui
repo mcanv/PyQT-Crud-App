@@ -23,10 +23,10 @@
     </rect>
    </property>
    <property name="text">
-    <string>Kullanıcı adı:</string>
+    <string>Username:</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="ekle">
+  <widget class="QPushButton" name="create">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -36,7 +36,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Ekle</string>
+    <string>Add</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_2">
@@ -49,7 +49,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Eposta:</string>
+    <string>Email:</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_3">
@@ -62,10 +62,10 @@
     </rect>
    </property>
    <property name="text">
-    <string>Şifre:</string>
+    <string>Password:</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="sil">
+  <widget class="QPushButton" name="delete">
    <property name="geometry">
     <rect>
      <x>260</x>
@@ -75,10 +75,10 @@
     </rect>
    </property>
    <property name="text">
-    <string>Sil</string>
+    <string>Delete</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="guncelle">
+  <widget class="QPushButton" name="update">
    <property name="geometry">
     <rect>
      <x>560</x>
@@ -88,7 +88,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Güncelle</string>
+    <string>Update</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="username">
@@ -124,7 +124,7 @@
     <enum>QLineEdit::Password</enum>
    </property>
   </widget>
-  <widget class="QTableWidget" name="uyeler">
+  <widget class="QTableWidget" name="users">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -157,7 +157,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Kullanıcı ID:</string>
+    <string>User ID:</string>
    </property>
   </widget>
  </widget>
