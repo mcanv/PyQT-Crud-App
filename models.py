@@ -17,7 +17,7 @@ class User(Base):
     email = Column(String(150), nullable=False, unique=True)
     password = Column(String(255), nullable=False)
     created_at = Column(DateTime, nullable=False, default=datetime.datetime.now())
-    updated_at = Column(DateTime, nullable=False, default=datetime.datetime.now())
+    updated_at = Column(DateTime, nullable=False, default=datetime.datetime.now(), onupdate=datetime.datetime.now())
     
     def set_password(self, password):
         self.password = generate_password_hash(password)

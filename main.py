@@ -3,7 +3,6 @@ import sys
 from PyQt5 import QtWidgets, uic
 from models import session, User
 import re
-import pyperclip
 
 class Window(QtWidgets.QMainWindow):
     def __init__(self):
@@ -18,8 +17,6 @@ class Window(QtWidgets.QMainWindow):
         self.uyeler.setAlternatingRowColors(True)
         self.uyeler.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         self.show()
-        # double click table row
-        self.uyeler.itemClicked.connect(self.copyText)
         self.ekle.clicked.connect(self.createUser)
         self.sil.clicked.connect(self.deleteUser)
         self.uyeler.doubleClicked.connect(self.getUser)
@@ -31,10 +28,6 @@ class Window(QtWidgets.QMainWindow):
             return True 
         else:
             return False
-        
-    def copyText(self, item):
-        text = item.text()
-        pyperclip.copy(text)
         
     def sendError(self, error):
         return QtWidgets.QMessageBox.warning(self, 'Hata', error)
@@ -106,7 +99,6 @@ class Window(QtWidgets.QMainWindow):
                         user.set_password(self.pwd.text())
                     user.name = self.username.text()
                     user.email = self.email.text()
-                    user.updated_at = datetime.datetime.now()
                     session.commit()
                     self.userid.clear()
                     self.username.clear()
