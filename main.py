@@ -102,14 +102,11 @@ class Window(QtWidgets.QMainWindow):
                     self.sendError('Şifre en az 6 karakter olmalıdır')
                     self.pwd.clear()
                 else:
-                    session.query(User).filter_by(id=int(user.id)).update(
-                        {
-                            'name': self.username.text(),
-                            'email': self.email.text(),
-                            'password': self.generatePassword(self.pwd.text()) if self.pwd.text() else user.password,
-                            'updated_at': datetime.datetime.now()
-                        }
-                    )
+                    if self.pwd.text():
+                        user.set_password(self.pwd.text())
+                    user.name = self.username.text()
+                    user.email = self.email.text()
+                    user.updated_at = datetime.datetime.now()
                     session.commit()
                     self.userid.clear()
                     self.username.clear()
