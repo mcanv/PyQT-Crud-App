@@ -1,4 +1,3 @@
-import datetime
 import sys
 from PyQt5 import QtWidgets, uic
 from models import session, User
