@@ -73,7 +73,7 @@ class Window(QtWidgets.QMainWindow):
             self.email.clear()
             self.pwd.clear()
             self.getUsers()
-            self.sendMessage('Kullanıcı başarıyla eklendi')
+            self.sendMessage(f'{user.name} adında kullanıcı başarıyla eklendi')
             
     def deleteUser(self):
         if self.uyeler.currentRow() == -1:
@@ -81,7 +81,7 @@ class Window(QtWidgets.QMainWindow):
         else:
             name = self.uyeler.item(self.uyeler.currentRow(), 0).text()
             if name:
-                question = self.sendQuestion('Bu kullanıcıyı silmek istediğinize emin misiniz?', 'Silme')
+                question = self.sendQuestion(f'{name} adlı kullanıcıyı silmek istediğinize emin misiniz?', 'Silme')
                 if question == QtWidgets.QMessageBox.Yes:
                     user = session.query(User).filter_by(name=name).first()
                     session.delete(user)
