@@ -2,7 +2,6 @@ import datetime
 import sys
 from PyQt5 import QtWidgets, uic
 from models import session, User
-from werkzeug.security import generate_password_hash
 import re
 import pyperclip
 
@@ -26,10 +25,6 @@ class Window(QtWidgets.QMainWindow):
         self.uyeler.doubleClicked.connect(self.getUser)
         self.guncelle.clicked.connect(self.updateUser)
         
-    def generatePassword(self, password) -> str:
-        hashed_password = generate_password_hash(password, method='sha256', salt_length=8)
-        return hashed_password
-    
     def isEmail(self, email) -> bool:
         regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
         if re.match(regex, email):
@@ -60,7 +55,8 @@ class Window(QtWidgets.QMainWindow):
         self.email.setText(user.email)
         
     def createUser(self):
-        user = User(name=self.username.text(), email=self.email.text(), password=self.generatePassword(self.pwd.text()))
+        user = User(name=self.username.text(), email=self.email.text())
+        user.set_password(self.pwd.text())
         existing_user = session.query(User).filter_by(name=self.username.text()).first()
         if existing_user:
             self.sendError('Bu kullanıcı zaten kayıtlı')
@@ -126,9 +122,8 @@ class Window(QtWidgets.QMainWindow):
             
     def getUsers(self):
         users = session.query(User).all()
-        column_count_table = len(users[0].__table__.columns.keys())
         self.uyeler.setRowCount(len(users))
-        self.uyeler.setColumnCount(column_count_table - 1)
+        self.uyeler.setColumnCount(5)
         self.uyeler.setHorizontalHeaderLabels(['Adı', 'Eposta', 'Şifre', 'Katılım', 'Güncelleme'])
         for user in users:
             self.uyeler.setItem(users.index(user), 0, QtWidgets.QTableWidgetItem(user.name))
