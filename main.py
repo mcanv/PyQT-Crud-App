@@ -29,6 +29,13 @@ class Window(QtWidgets.QMainWindow):
         else:
             return False
         
+    def closeEvent(self, event):
+        answer = self.sendQuestion('Çıkmak istediğinize emin misiniz?', 'Çıkış')
+        if answer == QtWidgets.QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
+        
     def sendError(self, error):
         return QtWidgets.QMessageBox.warning(self, 'Hata', error)
     
