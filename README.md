@@ -23,7 +23,7 @@ mysql -u 'username' -p
 şeklinde cli ortamından veritabanı bağlantımızı yapalım ve veritabanımızı oluşturalım;
 
 ```
-CREATE DATABASE 'dbname'
+CREATE DATABASE 'dbname';
 ```
 
 Sonrasında .env.example dosyasının adını .env yapalım ve içerisindeki ortam değişkenleri değerlerini kendimize göre düzenleyelim.
