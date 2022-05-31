@@ -48,7 +48,7 @@ class Window(QtWidgets.QMainWindow):
         self.getUsers()
         
     def getUser(self):
-        user = session.query(User).filter_by(name=self.uyeler.item(self.uyeler.currentRow(), 0).text()).first()
+        user = session.query(User).filter_by(name=self.users.item(self.users.currentRow(), 0).text()).first()
         self.userid.setText(str(user.id))
         self.username.setText(user.name)
         self.email.setText(user.email)
@@ -75,10 +75,10 @@ class Window(QtWidgets.QMainWindow):
             self.sendMessage(f'User {user.name} created')
             
     def deleteUser(self):
-        if self.uyeler.currentRow() == -1:
+        if self.users.currentRow() == -1:
             self.sendError('Please select a user to delete')
         else:
-            name = self.uyeler.item(self.uyeler.currentRow(), 0).text()
+            name = self.users.item(self.users.currentRow(), 0).text()
             if name:
                 question = self.sendQuestion(f'Do you want to delete {name} user?', 'Deleting')
                 if question == QtWidgets.QMessageBox.Yes:
@@ -89,7 +89,7 @@ class Window(QtWidgets.QMainWindow):
                     self.sendMessage('Kullanıcı silindi')
                     
     def updateUser(self):
-        if self.uyeler.currentRow() == -1:
+        if self.users.currentRow() == -1:
             self.sendError('Please select a user to update')
         elif self.userid.text() == '':
             self.sendError('Please select a user to update')
@@ -119,15 +119,15 @@ class Window(QtWidgets.QMainWindow):
             
     def getUsers(self):
         users = session.query(User).all()
-        self.uyeler.setRowCount(len(users))
-        self.uyeler.setColumnCount(5)
-        self.uyeler.setHorizontalHeaderLabels(['Username', 'Email', 'Password', 'Created', 'Updated'])
+        self.users.setRowCount(len(users))
+        self.users.setColumnCount(5)
+        self.users.setHorizontalHeaderLabels(['Username', 'Email', 'Password', 'Created', 'Updated'])
         for user in users:
-            self.uyeler.setItem(users.index(user), 0, QtWidgets.QTableWidgetItem(user.name))
-            self.uyeler.setItem(users.index(user), 1, QtWidgets.QTableWidgetItem(user.email))
-            self.uyeler.setItem(users.index(user), 2, QtWidgets.QTableWidgetItem(user.password))
-            self.uyeler.setItem(users.index(user), 3, QtWidgets.QTableWidgetItem(user.created_at.strftime('%d.%m.%Y %H:%M:%S')))
-            self.uyeler.setItem(users.index(user), 4, QtWidgets.QTableWidgetItem(user.updated_at.strftime('%d.%m.%Y %H:%M:%S')))
+            self.users.setItem(users.index(user), 0, QtWidgets.QTableWidgetItem(user.name))
+            self.users.setItem(users.index(user), 1, QtWidgets.QTableWidgetItem(user.email))
+            self.users.setItem(users.index(user), 2, QtWidgets.QTableWidgetItem(user.password))
+            self.users.setItem(users.index(user), 3, QtWidgets.QTableWidgetItem(user.created_at.strftime('%d.%m.%Y %H:%M:%S')))
+            self.users.setItem(users.index(user), 4, QtWidgets.QTableWidgetItem(user.updated_at.strftime('%d.%m.%Y %H:%M:%S')))
         
 app = QtWidgets.QApplication(sys.argv)
 

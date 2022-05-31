@@ -20,7 +20,7 @@ class User(Base):
     updated_at = Column(DateTime, nullable=False, default=datetime.datetime.now(), onupdate=datetime.datetime.now())
     
     def set_password(self, password):
-        self.password = generate_password_hash(password)
+        self.password = generate_password_hash(password, method="sha256")
     
 engine = create_engine(f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASS')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}?charset=utf8mb4", encoding='utf-8', echo=True)
 Base.metadata.create_all(engine)
